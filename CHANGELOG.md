@@ -1,3 +1,15 @@
+# [1.108.0-freetown.1](https://github.com/dadiorchen/treetracker-admin-client/compare/v1.107.18...v1.108.0-freetown.1) (2023-03-29)
+
+
+### Bug Fixes
+
+* freetown action ([90e05de](https://github.com/dadiorchen/treetracker-admin-client/commit/90e05de3c7e4b6911def11307cdeb6c2a5ccb715))
+
+
+### Features
+
+* rename release file ([fcd97c5](https://github.com/dadiorchen/treetracker-admin-client/commit/fcd97c5a906550f76309d04753d9b3a03d4e189f))
+
 ## [1.107.3](https://github.com/Greenstand/treetracker-admin-client/compare/v1.107.2...v1.107.3) (2022-09-28)
 
 
