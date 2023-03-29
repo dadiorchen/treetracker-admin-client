@@ -35,11 +35,16 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16.14.x'
-      - name: Load channel
-        run: echo ::set-output name=CHANNEL::$(echo `node -e ' process.env.GITHUB_REF_NAME === "master" ? console.log("") :console.log(require("./.releaserc.json").branches.reduce((a,c) => a || c.name === process.env.GITHUB_REF_NAME  && "-" + c.channel, false))'`) ; echo 'xxxx';
+      - name: Resolve channle, and secrets name
+        run: echo ::set-output name=VALUE::$(echo `node -e ' process.env.GITHUB_REF_NAME === "master" ? console.log("") :console.log(require("./.releaserc.json").branches.reduce((a,c) => a || c.name === process.env.GITHUB_REF_NAME  && "-" + c.channel, false))'`)
         id: channel
-      - name: Print channel
-        run: echo ${{ steps.channel.outputs.CHANNEL }}
+      - name: Resolve secret name for s3 bucket
+        run: echo ::set-output name=VALUE::$(echo 'xxx')
+        id: secret_name_s3_bucket
+      - name: Print resolver
+        run: |
+          echo ${{ steps.channel.outputs.VALUE }}
+          echo ${{ steps.secret_name_s3_bucket.outputs.VALUE }} 
         #      - name: npm clean install
         #        run: npm ci --legacy-peer-deps
         #        working-directory: ${{ env.project-directory }}
