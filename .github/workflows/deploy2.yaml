@@ -7,14 +7,14 @@ on:
         description: 'Version to deploy'
         required: true
         default: 'latest'
-          #      env:
-          #        type: choice
-          #        description: Environment to deploy to
-          #        options:
-          #          - dev
-          #          - test
-          #          - prod
-          #        default: 'dev'
+      env:
+        type: choice
+        description: Environment to deploy to
+        options:
+          - dev
+          - test
+          - prod
+        default: 'dev'
 
 env:
   project-directory: ./
@@ -22,9 +22,18 @@ env:
 
 
 jobs:
+  prepare:
+    name: checking and prepare settings for jobs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '18.x'
+
   frontend:
     name: Build Frontend Project
     runs-on: ubuntu-latest
+    needs: prepare
     if: |
       !contains(github.event.head_commit.message, 'skip-ci')
     steps:
@@ -35,16 +44,23 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '16.14.x'
-      - name: Resolve channle, and secrets name
-        run: echo ::set-output name=VALUE::$(echo `node -e ' process.env.GITHUB_REF_NAME === "master" ? console.log("") :console.log(require("./.releaserc.json").branches.reduce((a,c) => a || c.name === process.env.GITHUB_REF_NAME  && "-" + c.channel, false))'`)
+      - run: |
+          echo ref name: $GITHUB_REF_NAME
+      - name: Resolve channl
+        run: echo ::set-output name=VALUE::$(echo `node -e ' process.env.GITHUB_REF_NAME === "master" ? console.log("") :console.log(require("./.releaserc.json").branches.reduce((a,c) => a || c.name === process.env.GITHUB_REF_NAME  && c.channel, false))'`)
         id: channel
-      - name: Resolve secret name for s3 bucket
-        run: echo ::set-output name=VALUE::$(echo 'xxx')
-        id: secret_name_s3_bucket
+        with:
+            
+      - name: Resolve secret name for s3
+        run: echo ::set-output name=VALUE::$(echo `node -e 'console.log({dev_freetown:"DEV_CDN_S3_BUCKET_FREETOWN",prod:"PRODUCTION_CLUSTER_NAME",test:"TEST_CLUSTER_NAME"}[process.env.ENV_TO_DEPLOY])'`)
+        id: s3_bucket_secret_name
+        with:
+          ENV_TO_DEPLOY: ${{ github.event.inputs.env }}
+          CHANNEL: ${{ github.steps.channel.outputs.VALUE }}
       - name: Print resolver
         run: |
           echo ${{ steps.channel.outputs.VALUE }}
-          echo ${{ steps.secret_name_s3_bucket.outputs.VALUE }} 
+          echo ${{ steps.s3_bucket_secret_name.outputs.VALUE }} 
         #      - name: npm clean install
         #        run: npm ci --legacy-peer-deps
         #        working-directory: ${{ env.project-directory }}
